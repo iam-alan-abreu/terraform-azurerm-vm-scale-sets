@@ -8,6 +8,16 @@ variable "location" {
   default     = ""
 }
 
+variable "join_admin_username" {
+  description = "A container that holds related resources for an Azure solution"
+  default     = null
+}
+
+variable "join_admin_password" {
+  description = "A container that holds related resources for an Azure solution"
+  default     = null
+}
+
 variable "subnet_id" {
   description = "The id of the subnet to use in VM scale set"
   default     = ""
