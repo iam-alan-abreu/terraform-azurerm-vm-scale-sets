@@ -743,7 +743,7 @@ resource "azurerm_virtual_machine_scale_set_extension" "join_domain" {
     {
       "Name": "${var.domain_name}", 
       "OUPath": "${var.ou_path}", 
-      "User": "${var.admin_username}", 
+      "User": "${var.join_admin_username}", 
       "Restart": "true", 
       "Options": "3"
     }
@@ -751,7 +751,7 @@ resource "azurerm_virtual_machine_scale_set_extension" "join_domain" {
 
   protected_settings = <<PROTECTED_SETTINGS
  { 
-  "Password": "${var.admin_password}" 
+  "Password": "${var.join_admin_password}" 
   } 
 PROTECTED_SETTINGS 
 }
