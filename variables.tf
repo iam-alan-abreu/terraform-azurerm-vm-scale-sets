@@ -18,6 +18,11 @@ variable "join_admin_password" {
   default     = null
 }
 
+variable "application_gateway_backend_address_pool_ids" {
+  description = "A container that holds related resources for an Azure solution"
+  default     = []
+}
+
 variable "subnet_id" {
   description = "The id of the subnet to use in VM scale set"
   default     = ""
