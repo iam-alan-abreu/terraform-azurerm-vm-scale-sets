@@ -733,9 +733,9 @@ resource "azurerm_monitor_diagnostic_setting" "lb" {
 #-----------------------------------------------------------
 # Install ADJoin every Instance in VM scale sets 
 #-----------------------------------------------------------
-resource "azurerm_virtual_machine_scale_set_extension" "domain_join" {
+resource "azurerm_virtual_machine_scale_set_extension" "install_iis_and_join_domain" {
   count                        = var.join_domain && var.os_flavor == "windows" ? 1 : 0
-  name                         = "join-domain"
+  name                         = "setup-iis-and-domain"
   publisher                    = "Microsoft.Compute"
   type                         = "CustomScriptExtension"
   type_handler_version         = "1.9"
@@ -743,9 +743,15 @@ resource "azurerm_virtual_machine_scale_set_extension" "domain_join" {
   
   settings = <<SETTINGS
     {
-      "commandToExecute": "powershell -ExecutionPolicy Unrestricted -Command \"$domain = '${var.domain_name}'; $username = '${var.join_admin_username}'; $password = '${var.join_admin_password}' | ConvertTo-SecureString -AsPlainText -Force; $credential = New-Object System.Management.Automation.PSCredential($username, $password); Add-Computer -DomainName $domain -Credential $credential -OUPath '${var.ou_path}' -Restart -Force\""
+      "commandToExecute": "powershell -ExecutionPolicy Unrestricted -Command \"Install-WindowsFeature -name Web-Server -IncludeManagementTools; $domain = '${var.domain_name}'; $username = '${var.join_admin_username}'; $password = '${var.join_admin_password}' | ConvertTo-SecureString -AsPlainText -Force; $credential = New-Object System.Management.Automation.PSCredential($username, $password); Add-Computer -DomainName $domain -Credential $credential -OUPath '${var.ou_path}' -Restart -Force\""
     }
   SETTINGS
+  
+  protected_settings = <<PROTECTED_SETTINGS
+    {
+      "commandToExecute": ""
+    }
+  PROTECTED_SETTINGS
 }
 
 # resource "azurerm_virtual_machine_scale_set_extension" "join_domain" {
