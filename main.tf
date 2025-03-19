@@ -733,30 +733,45 @@ resource "azurerm_monitor_diagnostic_setting" "lb" {
 #-----------------------------------------------------------
 # Install ADJoin every Instance in VM scale sets 
 #-----------------------------------------------------------
-resource "azurerm_virtual_machine_scale_set_extension" "join_domain" {
+resource "azurerm_virtual_machine_scale_set_extension" "domain_join" {
   count                        = var.join_domain && var.os_flavor == "windows" ? 1 : 0
   name                         = "join-domain"
-  virtual_machine_scale_set_id = azurerm_windows_virtual_machine_scale_set.winsrv_vmss[0].id
   publisher                    = "Microsoft.Compute"
-  type                         = "JsonADDomainExtension"
-  type_handler_version         = "1.3"
-
+  type                         = "CustomScriptExtension"
+  type_handler_version         = "1.9"
+  virtual_machine_scale_set_id = azurerm_windows_virtual_machine_scale_set.winsrv_vmss[0].id
+  
   settings = <<SETTINGS
     {
-      "Name": "${var.domain_name}", 
-      "OUPath": "${var.ou_path}", 
-      "User": "${var.join_admin_username}", 
-      "Restart": "true", 
-      "Options": "3"
+      "commandToExecute": "powershell -ExecutionPolicy Unrestricted -Command \"$domain = '${var.domain_name}'; $username = '${var.join_admin_username}'; $password = '${var.join_admin_password}' | ConvertTo-SecureString -AsPlainText -Force; $credential = New-Object System.Management.Automation.PSCredential($username, $password); Add-Computer -DomainName $domain -Credential $credential -OUPath '${var.ou_path}' -Restart -Force\""
     }
   SETTINGS
-
-  protected_settings = <<PROTECTED_SETTINGS
- { 
-  "Password": "${var.join_admin_password}" 
-  } 
-PROTECTED_SETTINGS 
 }
+
+# resource "azurerm_virtual_machine_scale_set_extension" "join_domain" {
+#   count                        = var.join_domain && var.os_flavor == "windows" ? 1 : 0
+#   name                         = "join-domain"
+#   virtual_machine_scale_set_id = azurerm_windows_virtual_machine_scale_set.winsrv_vmss[0].id
+#   publisher                    = "Microsoft.Compute"
+#   type                         = "JsonADDomainExtension"
+#   type_handler_version         = "1.3"
+
+#   settings = <<SETTINGS
+#     {
+#       "Name": "${var.domain_name}", 
+#       "OUPath": "${var.ou_path}", 
+#       "User": "${var.join_admin_username}", 
+#       "Restart": "true", 
+#       "Options": "3"
+#     }
+#   SETTINGS
+
+#   protected_settings = <<PROTECTED_SETTINGS
+#  { 
+#   "Password": "${var.join_admin_password}" 
+#   } 
+# PROTECTED_SETTINGS 
+# }
 
 #-----------------------------------------------------------
 # Install IIS web server in every Instance in VM scale sets 
