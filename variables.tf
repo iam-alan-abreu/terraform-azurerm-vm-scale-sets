@@ -612,6 +612,21 @@ variable "ou_path" {
 # }
 
 
+variable "vm_extensions" {
+  description = "Lista de extensões para aplicar ao VM Scale Set Windows"
+  type = list(object({
+    name                       = string
+    publisher                  = string
+    type                       = string
+    type_handler_version       = string
+    auto_upgrade_minor_version = bool
+    settings                   = optional(string)
+    protected_settings         = optional(string)
+  }))
+  default = [ ]
+}
+
+
 /*
 KV
 */
