@@ -432,6 +432,21 @@ resource "azurerm_windows_virtual_machine_scale_set" "winsrv_vmss" {
     }
   }
 
+  # Adicione o bloco de extensões dinâmicas aqui
+  dynamic "extension" {
+    for_each = var.vm_extensions
+    content {
+      name                       = extension.value.name
+      publisher                  = extension.value.publisher
+      type                       = extension.value.type
+      type_handler_version       = extension.value.type_handler_version
+      auto_upgrade_minor_version = extension.value.auto_upgrade_minor_version
+      
+      settings           = lookup(extension.value, "settings", null)
+      protected_settings = lookup(extension.value, "protected_settings", null)
+    }
+  }
+
   network_interface {
     name                          = lower("nic-${format("vm%s%s", lower(replace(var.vmscaleset_name, "/[[:^alnum:]]/", "")), count.index + 1)}")
     primary                       = true
